@@ -4,7 +4,7 @@ import Layout from "./components/layout/Layout";
 import Discover from "./pages/discover/Discover";
 import Profile from "./pages/profile/profile";
 import VenueInfo from "./pages/venueInfo/venueInfo";
-import Login from "./pages/login/Login";
+import Login from "./pages/login/login";
 import Register from "./pages/register/Register";
 
 const queryClient = new QueryClient();
