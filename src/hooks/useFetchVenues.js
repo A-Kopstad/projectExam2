@@ -1,11 +1,14 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import apiClient from '../api';
+import apiClient from '../apiUtility/apiUtility';
 
 // Fetch all venues
 export const useFetchVenues = (queryParams = {}) => {
-  const { data, error, isLoading } = useQuery(['venues', queryParams], async () => {
-    const response = await apiClient.get('/venues', { params: queryParams });
-    return response.data;
+  const { data, error, isLoading } = useQuery({
+    queryKey: ['venues', queryParams],
+    queryFn: async () => {
+      const response = await apiClient.get('/holidaze/venues', { params: queryParams });
+      return response.data;
+    },
   });
 
   return { data, error, isLoading };
@@ -13,26 +16,32 @@ export const useFetchVenues = (queryParams = {}) => {
 
 // Fetch a single venue by ID
 export const useFetchVenueById = (id, queryParams = {}) => {
-  const { data, error, isLoading } = useQuery(['venue', id, queryParams], async () => {
-    const response = await apiClient.get(`/venues/${id}`, { params: queryParams });
-    return response.data;
-  });
-
-  return { data, error, isLoading };
-};
+    const { data, error, isLoading } = useQuery({
+      queryKey: ['venue', id, queryParams],
+      queryFn: async () => {
+        if (!id) {
+          throw new Error('Invalid venue ID');
+        }
+        const response = await apiClient.get(`/holidaze/venues/${id}`, { params: queryParams });
+        return response.data;
+      },
+      enabled: !!id, 
+    });
+  
+    return { data, error, isLoading };
+  };
+  
 
 // Create a new venue
 export const useCreateVenue = () => {
   const queryClient = useQueryClient();
 
-  const mutation = useMutation(
-    (newVenue) => apiClient.post('/venues', newVenue),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries('venues');
-      },
-    }
-  );
+  const mutation = useMutation({
+    mutationFn: (newVenue) => apiClient.post('/holidaze/venues', newVenue),
+    onSuccess: () => {
+      queryClient.invalidateQueries('venues');
+    },
+  });
 
   return mutation;
 };
@@ -41,15 +50,14 @@ export const useCreateVenue = () => {
 export const useUpdateVenue = () => {
   const queryClient = useQueryClient();
 
-  const mutation = useMutation(
-    ({ id, updatedVenue }) => apiClient.put(`/venues/${id}`, updatedVenue),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries('venues');
-        queryClient.invalidateQueries(['venue', id]);
-      },
-    }
-  );
+  const mutation = useMutation({
+    mutationFn: ({ id, updatedVenue }) =>
+      apiClient.put(`/holidaze/venues/${id}`, updatedVenue),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries('venues');
+      queryClient.invalidateQueries(['venue', id]);
+    },
+  });
 
   return mutation;
 };
@@ -58,14 +66,12 @@ export const useUpdateVenue = () => {
 export const useDeleteVenue = () => {
   const queryClient = useQueryClient();
 
-  const mutation = useMutation(
-    (id) => apiClient.delete(`/venues/${id}`),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries('venues');
-      },
-    }
-  );
+  const mutation = useMutation({
+    mutationFn: (id) => apiClient.delete(`/holidaze/venues/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries('venues');
+    },
+  });
 
   return mutation;
 };

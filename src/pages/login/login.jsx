@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useLogin } from '../../hooks/useFetchAuth'; 
 import { useNavigate } from 'react-router-dom';
+import Message from '../../components/message/message'; // Import reusable Message component
 
 const Login = () => {
   const {
@@ -11,26 +12,27 @@ const Login = () => {
   } = useForm();
   const navigate = useNavigate();
   const { mutateAsync: login, isLoading } = useLogin();
+  const [alertMessage, setAlertMessage] = useState(null);
 
   const onSubmit = async (data) => {
     try {
-      console.log('Submitting login form with:', data);
       const response = await login({
         email: data.email,
         password: data.password,
       });
-      console.log('Login successful:', response);
 
-      // Store data in local storage
+      // Store user data in localStorage
       localStorage.setItem('accessToken', response.data.accessToken);
       localStorage.setItem('username', response.data.name);
       localStorage.setItem('avatar', response.data.avatar?.url || '');
 
-      // Redirect to the desired page
-      navigate('/');
+      // Redirect to profile page
+      navigate('/profile');
     } catch (error) {
       console.error('Login error:', error);
-      alert('Login failed. Please check your credentials.');
+
+      // Display error message
+      setAlertMessage('Login failed. Please check your credentials.');
     }
   };
 
@@ -38,6 +40,8 @@ const Login = () => {
     <div className="container mt-5">
       <h1>Login Page</h1>
       <form onSubmit={handleSubmit(onSubmit)} className="mt-4">
+        
+        {/* Email Field */}
         <div className="mb-3">
           <label className="form-label">Email:</label>
           <input
@@ -49,6 +53,7 @@ const Login = () => {
             <div className="text-danger">{errors.email.message}</div>
           )}
         </div>
+        {/* Password Field */}
         <div className="mb-3">
           <label className="form-label">Password:</label>
           <input
@@ -60,6 +65,15 @@ const Login = () => {
             <div className="text-danger">{errors.password.message}</div>
           )}
         </div>
+        {/* Message Component */}
+        {alertMessage && (
+          <div className="mb-3">
+            <Message variant="danger" onClose={() => setAlertMessage(null)}>
+              {alertMessage}
+            </Message>
+          </div>
+        )}
+        {/* Submit Button */}
         <button
           type="submit"
           className="btn btn-primary"

@@ -6,8 +6,10 @@ import Profile from "./pages/profile/profile";
 import VenueInfo from "./pages/venueInfo/venueInfo";
 import Login from "./pages/login/login";
 import Register from "./pages/register/Register";
+import Home from './pages/home/home';
 
 const queryClient = new QueryClient();
+
 
 function App() {
   return (
@@ -15,6 +17,7 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Layout />}>
+            <Route index element={<Home />} /> 
             <Route path="discover" element={<Discover />} />
             <Route path="login" element={<Login />} />
             <Route path="register" element={<Register />} />

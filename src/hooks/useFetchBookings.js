@@ -1,11 +1,14 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import apiClient from '../api';
+import apiClient from '../apiUtility/apiUtility';
 
 // Fetch all bookings
 export const useFetchBookings = (queryParams = {}) => {
-  const { data, error, isLoading } = useQuery(['bookings', queryParams], async () => {
-    const response = await apiClient.get('/bookings', { params: queryParams });
-    return response.data;
+  const { data, error, isLoading } = useQuery({
+    queryKey: ['bookings', queryParams],
+    queryFn: async () => {
+      const response = await apiClient.get('/holidaze/bookings', { params: queryParams });
+      return response.data;
+    },
   });
 
   return { data, error, isLoading };
@@ -13,9 +16,12 @@ export const useFetchBookings = (queryParams = {}) => {
 
 // Fetch a single booking by ID
 export const useFetchBookingById = (id, queryParams = {}) => {
-  const { data, error, isLoading } = useQuery(['booking', id, queryParams], async () => {
-    const response = await apiClient.get(`/bookings/${id}`, { params: queryParams });
-    return response.data;
+  const { data, error, isLoading } = useQuery({
+    queryKey: ['booking', id, queryParams],
+    queryFn: async () => {
+      const response = await apiClient.get(`/holidaze/bookings/${id}`, { params: queryParams });
+      return response.data;
+    },
   });
 
   return { data, error, isLoading };
@@ -25,14 +31,16 @@ export const useFetchBookingById = (id, queryParams = {}) => {
 export const useCreateBooking = () => {
   const queryClient = useQueryClient();
 
-  const mutation = useMutation(
-    (newBooking) => apiClient.post('/bookings', newBooking),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries('bookings');
-      },
-    }
-  );
+  const mutation = useMutation({
+    mutationFn: (newBooking) => apiClient.post('/holidaze/bookings', newBooking),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['bookings']); 
+    },
+    onError: (error) => {
+        console.error("Error creating booking: ", error.response?.data || error.message);
+        setBookingError("Failed to create booking. Please try again.");
+      }
+  });
 
   return mutation;
 };
@@ -41,15 +49,17 @@ export const useCreateBooking = () => {
 export const useUpdateBooking = () => {
   const queryClient = useQueryClient();
 
-  const mutation = useMutation(
-    ({ id, updatedBooking }) => apiClient.put(`/bookings/${id}`, updatedBooking),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries('bookings');
-        queryClient.invalidateQueries(['booking', id]);
-      },
+  const mutation = useMutation({
+    mutationFn: ({ id, updatedBooking }) =>
+      apiClient.put(`/holidaze/bookings/${id}`, updatedBooking),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries(['bookings']);  
+      queryClient.invalidateQueries(['booking', id]);  
+    },
+    onError: (error) => {
+      console.error("Error updating booking: ", error);
     }
-  );
+  });
 
   return mutation;
 };
@@ -58,14 +68,15 @@ export const useUpdateBooking = () => {
 export const useDeleteBooking = () => {
   const queryClient = useQueryClient();
 
-  const mutation = useMutation(
-    (id) => apiClient.delete(`/bookings/${id}`),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries('bookings');
-      },
+  const mutation = useMutation({
+    mutationFn: (id) => apiClient.delete(`/holidaze/bookings/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['bookings']);  
+    },
+    onError: (error) => {
+      console.error("Error deleting booking: ", error);
     }
-  );
+  });
 
   return mutation;
 };
