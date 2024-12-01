@@ -198,12 +198,13 @@ const VenueInfo = () => {
           <Button className='mb-5' variant="success" onClick={handleBooking}>Confirm Booking</Button>
         </Col>
       </Row>
+      <div className='mt-4'>
       {bookingError && (
         <Message variant="danger" onClose={() => setBookingError(null)}>{bookingError}</Message>
       )}
       {successMessage && (
         <Message variant="success" onClose={() => setSuccessMessage(null)}>{successMessage}</Message>
-      )}
+      )}</div>
     </Container>
   );
 };
