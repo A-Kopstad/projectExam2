@@ -120,7 +120,7 @@ const VenueInfo = () => {
   const totalPrice = calculateTotalNights() * price;
 
   return (
-    <Container className="venue-info mt-4">
+    <Container className="venue-info my-4">
       <Row className="mb-4">
         <Col>
           <h1>{name}</h1>
