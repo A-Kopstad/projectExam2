@@ -5,7 +5,7 @@ import Discover from "./pages/discover/Discover";
 import Profile from "./pages/profile/profile";
 import VenueInfo from "./pages/venueInfo/venueInfo";
 import Login from "./pages/login/login";
-import Register from "./pages/register/Register";
+import Register from "./pages/register/register";
 import Home from './pages/home/home';
 
 const queryClient = new QueryClient();
